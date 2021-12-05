@@ -21,6 +21,8 @@ def expand_point(p1: tuple[int, int], p2: tuple[int, int]) -> list[tuple[int, in
         x_components = range(x1, x2 + (1 if x1 < x2 else -1), 1 if x1 < x2 else -1)
         y_components = range(y1, y2 + (1 if y1 < y2 else -1), 1 if y1 < y2 else -1)
         return list(zip(x_components, y_components))
+    else:
+        return []
 
 
 def expand_points(point_pairs: list[tuple[tuple[int, int], tuple[int, int]]]) -> defaultdict:
