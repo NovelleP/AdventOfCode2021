@@ -25,12 +25,13 @@ def solve_display(
     bad_segment_to_freq = Counter(list(''.join(patterns)))
     freq_to_bad_segments = invert_dict(bad_segment_to_freq)
 
-    segment_to_bad_segment = {}
+    bad_segment_to_segment = {}
     # non ambiguous segments
     for freq, segments in freq_to_segments.items():
         if len(segments) == 1:
             segment = next(iter(segments))
-            segment_to_bad_segment[segment] = freq_to_bad_segments[freq].pop()
+            bad_segment = freq_to_bad_segments[freq].pop()
+            bad_segment_to_segment[bad_segment] = segment
             del freq_to_bad_segments[freq]
 
     # ambiguous segments
@@ -39,16 +40,16 @@ def solve_display(
         for segment in pattern:
             bad_segment_to_neighbors[segment] += len(pattern) - 1
 
-    segments_used = set(segment_to_bad_segment.keys())
+    segments_used = set(bad_segment_to_segment.values())
     for bad_segments in freq_to_bad_segments.values():
         for bad_segment in bad_segments:
             bad_segment_neighbors = bad_segment_to_neighbors[bad_segment]
             candidates = neighbors_to_segments[bad_segment_neighbors]
             segment = next(iter(candidates - segments_used), None)
-            segment_to_bad_segment[segment] = bad_segment
+            bad_segment_to_segment[bad_segment] = segment
             segments_used.add(segment)
 
-    return segment_to_bad_segment
+    return bad_segment_to_segment
 
 
 def transform_segments(displayed_num: str, bad_segment_to_segment: dict[str, str]) -> str:
@@ -59,9 +60,8 @@ def transform_segments(displayed_num: str, bad_segment_to_segment: dict[str, str
 
 
 def calc_number(
-        displayed_nums: list[str], segment_to_bad_segment: dict[str, str], segment_to_num: dict[str, int]
+        displayed_nums: list[str], bad_segment_to_segment: dict[str, str], segment_to_num: dict[str, int]
 ) -> int:
-    bad_segment_to_segment = {bad_segment: segment for segment, bad_segment in segment_to_bad_segment.items()}
     number = 0
     for displayed_num in displayed_nums:
         displayed_num = transform_segments(displayed_num, bad_segment_to_segment)
@@ -78,8 +78,8 @@ def solve_displays(
 ) -> list[int]:
     numbers = []
     for patterns, displayed_nums in patterns_displayed_pairs:
-        segment_to_bad_segment = solve_display(patterns, freq_to_segments, neighbors_to_segments)
-        number = calc_number(displayed_nums, segment_to_bad_segment, segment_to_num)
+        bad_segment_to_segment = solve_display(patterns, freq_to_segments, neighbors_to_segments)
+        number = calc_number(displayed_nums, bad_segment_to_segment, segment_to_num)
         numbers.append(number)
     return numbers
 
